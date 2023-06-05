@@ -1,0 +1,19 @@
+.propost-recent-posts-section,
+.propost-recent-products-section {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.propost-recent-posts-section {
+    display: <?php if (!$display_posts) echo 'none'; ?>;
+}
+
+.propost-recent-products-section {
+    display: <?php if (!$display_products) echo 'none'; ?>;
+}
+
+.propost-recent-posts .widget-title,
+.propost-recent-products .widget-title {
+    margin-bottom: 10px;
+}
