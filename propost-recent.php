@@ -2,7 +2,7 @@
 /*
 Plugin Name: ProPost Recent
 Description: Displays recent posts and WooCommerce products in a widget sidebar.
-Version: 2.5
+Version: 2.4
 Author: Your Name
 */
 
@@ -44,7 +44,6 @@ class ProPost_Recent_Widget extends WP_Widget {
         $product_order = !empty($instance['product_order']) ? sanitize_text_field($instance['product_order']) : 'DESC';
         $post_order_by = !empty($instance['post_order_by']) ? sanitize_text_field($instance['post_order_by']) : 'date';
         $product_order_by = !empty($instance['product_order_by']) ? sanitize_text_field($instance['product_order_by']) : 'date';
-        $random_refresh = isset($instance['random_refresh']) ? (bool) $instance['random_refresh'] : false;
 
         echo $args['before_widget'];
 
@@ -73,15 +72,6 @@ class ProPost_Recent_Widget extends WP_Widget {
 
         echo '</div>';
         echo $args['after_widget'];
-
-        // Schedule cron job for refreshing random content
-        if ($random_refresh) {
-            if (!wp_next_scheduled('propost_recent_random_refresh')) {
-                wp_schedule_event(time(), 'propost_recent_refresh_interval', 'propost_recent_random_refresh');
-            }
-        } else {
-            wp_clear_scheduled_hook('propost_recent_random_refresh');
-        }
     }
 
     // Display recent posts
@@ -171,7 +161,6 @@ class ProPost_Recent_Widget extends WP_Widget {
         $product_order = !empty($instance['product_order']) ? sanitize_text_field($instance['product_order']) : 'DESC';
         $post_order_by = !empty($instance['post_order_by']) ? sanitize_text_field($instance['post_order_by']) : 'date';
         $product_order_by = !empty($instance['product_order_by']) ? sanitize_text_field($instance['product_order_by']) : 'date';
-        $random_refresh = isset($instance['random_refresh']) ? (bool) $instance['random_refresh'] : false;
 
         ?>
         <p>
@@ -268,12 +257,6 @@ class ProPost_Recent_Widget extends WP_Widget {
                 <option value="price" <?php selected($product_order_by, 'price'); ?>>Price</option>
             </select>
         </p>
-        <p>
-            <input class="checkbox" type="checkbox" <?php checked($random_refresh); ?>
-                   id="<?php echo $this->get_field_id('random_refresh'); ?>"
-                   name="<?php echo $this->get_field_name('random_refresh'); ?>"/>
-            <label for="<?php echo $this->get_field_id('random_refresh'); ?>">Update random content every 55 seconds</label>
-        </p>
         <?php
     }
 
@@ -292,25 +275,7 @@ class ProPost_Recent_Widget extends WP_Widget {
         $instance['product_order'] = !empty($new_instance['product_order']) ? sanitize_text_field($new_instance['product_order']) : 'DESC';
         $instance['post_order_by'] = !empty($new_instance['post_order_by']) ? sanitize_text_field($new_instance['post_order_by']) : 'date';
         $instance['product_order_by'] = !empty($new_instance['product_order_by']) ? sanitize_text_field($new_instance['product_order_by']) : 'date';
-        $instance['random_refresh'] = isset($new_instance['random_refresh']) ? (bool) $new_instance['random_refresh'] : false;
 
         return $instance;
     }
 }
-
-// Cron job callback function for refreshing random content
-function propost_recent_random_refresh_callback() {
-    // Refresh the page to update the random content
-    echo '<script>location.reload();</script>';
-}
-add_action('propost_recent_random_refresh', 'propost_recent_random_refresh_callback');
-
-// Define the refresh interval for the cron job
-function propost_recent_refresh_interval($schedules) {
-    $schedules['propost_recent_refresh_interval'] = array(
-        'interval' => 55,
-        'display' => __('Every 55 seconds')
-    );
-    return $schedules;
-}
-add_filter('cron_schedules', 'propost_recent_refresh_interval');
